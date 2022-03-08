@@ -15,15 +15,15 @@
 	chosen {
 		zephyr,sram = &sram0;
 		zephyr,flash = &flash0;
-		zephyr,console = &uart0;
-		zephyr,shell-uart = &uart0;
+		zephyr,console = &rp2040_cdc_acm_uart;
+		zephyr,shell-uart = &rp2040_cdc_acm_uart;
 		zephyr,code-partition = &code_partition;
 	};
 
 	leds {
 		compatible = "gpio-leds";
 		led0: led_0 {
-			gpios = <&gpio0 25 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
 			label = "LED";
 		};
 	};
@@ -71,16 +71,19 @@
 	status = "okay";
 };
 
-&i2c0 {
-	clock-frequency = <I2C_BITRATE_STANDARD>;
-	status = "okay";
-	pinctrl-0 = <&i2c0_default>;
-	pinctrl-names = "default";
-};
-
 &i2c1 {
 	clock-frequency = <I2C_BITRATE_STANDARD>;
 	status = "okay";
 	pinctrl-0 = <&i2c1_default>;
 	pinctrl-names = "default";
+};
+
+zephyr_udc0: &usbd {
+	compatible = "raspberrypi,pico-usbd";
+	status = "okay";
+
+	rp2040_cdc_acm_uart: rp2040_cdc_acm_uart {
+		compatible = "zephyr,cdc-acm-uart";
+		label = "CDC_ACM_0";
+	};
 };
