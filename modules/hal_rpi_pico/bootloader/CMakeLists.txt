@@ -3,6 +3,8 @@
 cmake_minimum_required(VERSION 3.20.0)
 
 # Skip compiler checking
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMKE_SYSTEM_PROCESSOR ARM)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 project(second_stage_bootloader)
