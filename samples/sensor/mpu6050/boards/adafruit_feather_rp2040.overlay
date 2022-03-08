@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) 2019 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+&i2c1 {
+	mpu6050@69 {
+		compatible = "invensense,mpu6050";
+		reg = <0x69>;
+		status = "okay";
+		label = "MPU6050";
+		int-gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>;
+	};
+};
