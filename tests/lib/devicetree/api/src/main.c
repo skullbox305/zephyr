@@ -560,14 +560,14 @@ struct gpios_struct {
 
 /* Helper macro that UTIL_LISTIFY can use and produces an element with comma */
 #define DT_PROP_ELEM_BY_PHANDLE(idx, node_id, ph_prop, prop) \
-	DT_PROP_BY_PHANDLE_IDX(node_id, ph_prop, idx, prop),
+	DT_PROP_BY_PHANDLE_IDX(node_id, ph_prop, idx, prop)
 #define DT_PHANDLE_LISTIFY(node_id, ph_prop, prop) \
 	{ \
-	  UTIL_LISTIFY(DT_PROP_LEN(node_id, ph_prop), \
-		       DT_PROP_ELEM_BY_PHANDLE, \
-		       node_id, \
-		       ph_prop, \
-		       label) \
+	  LISTIFY(DT_PROP_LEN(node_id, ph_prop), \
+		  DT_PROP_ELEM_BY_PHANDLE, (,), \
+		  node_id, \
+		  ph_prop, \
+		  label) \
 	}
 
 /* Helper macro that UTIL_LISTIFY can use and produces an element with comma */
@@ -576,10 +576,10 @@ struct gpios_struct {
 		DT_PROP(DT_PHANDLE_BY_IDX(node_id, prop, idx), label), \
 		DT_PHA_BY_IDX(node_id, prop, idx, pin),\
 		DT_PHA_BY_IDX(node_id, prop, idx, flags),\
-	},
+	}
 #define DT_GPIO_LISTIFY(node_id, prop) \
-	{ UTIL_LISTIFY(DT_PROP_LEN(node_id, prop), DT_GPIO_ELEM, \
-		       node_id, prop) }
+	{ LISTIFY(DT_PROP_LEN(node_id, prop), DT_GPIO_ELEM, (,), \
+		  node_id, prop) }
 
 #undef DT_DRV_COMPAT
 #define DT_DRV_COMPAT vnd_phandle_holder
@@ -2181,6 +2181,51 @@ static void test_mbox(void)
 				  DT_NODELABEL(test_mbox_zero_cell)), "");
 }
 
+static void test_string_token(void)
+{
+#undef DT_DRV_COMPAT
+#define DT_DRV_COMPAT vnd_string_token
+	enum {
+		token_zero,
+		token_one,
+		token_two,
+		token_max,
+		token_no_inst,
+	};
+	int i;
+
+	/* Test DT_INST_STRING_TOKEN_OR when property is found */
+	int array_inst[] = {
+#define STRING_TOKEN_TEST_INST_EXPANSION(inst)                                \
+	DT_INST_STRING_TOKEN_OR(inst, val, token_no_inst),
+	DT_INST_FOREACH_STATUS_OKAY(STRING_TOKEN_TEST_INST_EXPANSION)
+	};
+
+	for (i = 0; i < ARRAY_SIZE(array_inst); i++) {
+		zassert_true(array_inst[i] != token_no_inst, "");
+	}
+
+	/* Test DT_STRING_TOKEN_OR when property is found */
+	zassert_equal(DT_STRING_TOKEN_OR(DT_NODELABEL(test_string_token_0),
+		val, token_one), token_zero, "");
+	zassert_equal(DT_STRING_TOKEN_OR(DT_NODELABEL(test_string_token_1),
+		val, token_two), token_one, "");
+
+	/* Test DT_STRING_TOKEN_OR is not found */
+	zassert_equal(DT_STRING_TOKEN_OR(DT_NODELABEL(test_string_token_1),
+		no_inst, token_zero), token_zero, "");
+
+	/* Test DT_INST_STRING_TOKEN_OR when property is not found */
+	int array_no_inst[] = {
+#define STRING_TOKEN_TEST_NO_INST_EXPANSION(inst)                             \
+	DT_INST_STRING_TOKEN_OR(inst, no_inst, token_no_inst),
+	DT_INST_FOREACH_STATUS_OKAY(STRING_TOKEN_TEST_NO_INST_EXPANSION)
+	};
+	for (i = 0; i < ARRAY_SIZE(array_no_inst); i++) {
+		zassert_true(array_no_inst[i] == token_no_inst, "");
+	}
+}
+
 void test_main(void)
 {
 	ztest_test_suite(devicetree_api,
@@ -2227,7 +2272,8 @@ void test_main(void)
 			 ztest_unit_test(test_node_name),
 			 ztest_unit_test(test_same_node),
 			 ztest_unit_test(test_pinctrl),
-			 ztest_unit_test(test_mbox)
+			 ztest_unit_test(test_mbox),
+			 ztest_unit_test(test_string_token)
 		);
 	ztest_run_test_suite(devicetree_api);
 }
