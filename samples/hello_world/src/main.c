@@ -8,6 +8,12 @@
 
 int main(void)
 {
-	printf("Hello World! %s\n", CONFIG_BOARD);
+	uint8_t test = 0;
+ 	printk("Hello World! %s\n", CONFIG_BOARD);
+
+	for(uint8_t i = 0; i < 255; i++) {
+		test++;
+		printk("%i\n", test);
+	}
 	return 0;
 }
